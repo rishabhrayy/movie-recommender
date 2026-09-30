@@ -26,7 +26,7 @@ def run_cli() -> None:
     movie_name = input("\nEnter movie name: ").strip()
 
     recommendations = recommender.recommend(movie_name, top_n=5)
-    print_recommendations(movie_name, recommendations)
+    print_recommendations(movie_name, recommendations, recommender.suggestions(movie_name))
 
 
 def create_app():
@@ -59,6 +59,7 @@ def create_app():
                         "movie": movie_name,
                         "recommendations": [],
                         "message": "Movie not found.",
+                        "did_you_mean": recommender.suggestions(movie_name),
                     }
                 ),
                 404,

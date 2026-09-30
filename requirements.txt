@@ -1,4 +1,6 @@
-pandas
-numpy
-scikit-learn
-flask
+pandas>=2.2
+numpy>=1.26
+scikit-learn>=1.5
+flask>=3.0
+kagglehub>=0.3
+pytest>=8

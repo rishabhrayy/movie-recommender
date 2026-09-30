@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en-AU">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Movie Recommender - Rishabh Ray</title>
+    <meta name="description" content="Pick a film, get five similar ones and the reason for each. Content-based recommendations over 4,800 films, precomputed and served as a static page." />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%233f4520'/><rect x='14' y='20' width='36' height='26' rx='4' fill='%23f7a23a'/><path d='M29 27v12l10-6z' fill='%233f4520'/></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <header>
+        <p class="eyebrow">4,800 films, content-based</p>
+        <h1>Liked a film? Here are five more.</h1>
+        <p class="lede">Matches on director, cast, genres, themes and plot, and tells you why each one was picked.</p>
+      </header>
+
+      <div class="search card">
+        <label for="q" class="sr">Search for a film</label>
+        <input id="q" type="search" placeholder="Type a film, e.g. The Dark Knight" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="list" aria-autocomplete="list" />
+        <ul id="list" role="listbox" hidden></ul>
+        <p class="try">Try:
+          <button type="button" data-film="The Dark Knight">The Dark Knight</button>
+          <button type="button" data-film="Toy Story">Toy Story</button>
+          <button type="button" data-film="Alien">Alien</button>
+          <button type="button" data-film="Pride &amp; Prejudice">Pride &amp; Prejudice</button>
+          <button type="button" data-film="Spirited Away">Spirited Away</button>
+        </p>
+      </div>
+
+      <section id="result" aria-live="polite"></section>
+
+      <footer class="small">
+        TF-IDF over two views of each film (metadata and plot), blended cosine similarity, precomputed for every film.
+        <a href="https://github.com/rishabhrayy/movie-recommender">Code</a> ·
+        <a href="https://rishabhray.vercel.app">rishabhray.vercel.app</a><br />
+        Data from the TMDB 5000 Movie Dataset. This product uses TMDB data but is not endorsed or certified by TMDB.
+      </footer>
+    </main>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
