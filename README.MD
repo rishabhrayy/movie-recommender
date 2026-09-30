@@ -1,6 +1,6 @@
 # Movie Recommendation System
 
-A complete, beginner-friendly content-based movie recommender built with Python.
+A content-based movie recommender in Python: TF-IDF over each film's genres and plot, ranked by cosine similarity, served through a CLI and a Flask API.
 
 The app takes a movie name as input and returns the top 5 most similar movies based on genres and overview text. It includes both an interactive command-line interface and a small Flask API.
 
