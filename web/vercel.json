@@ -1,6 +1,38 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "headers": [
-    { "source": "/films.json", "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600" }] }
+    {
+      "source": "/films.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "rishabhray-movies.vercel.app"
+        }
+      ],
+      "destination": "https://movies.rishabhray.me/",
+      "permanent": true
+    },
+    {
+      "source": "/:path+",
+      "has": [
+        {
+          "type": "host",
+          "value": "rishabhray-movies.vercel.app"
+        }
+      ],
+      "destination": "https://movies.rishabhray.me/:path+",
+      "permanent": true
+    }
   ]
 }
