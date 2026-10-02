@@ -2,7 +2,7 @@
 
 Pick a film, get five similar ones, and see **why** each was picked: a shared director, a lead actor, genres, or themes.
 
-**[Try the live demo](https://rishabhray-movies.vercel.app)** - 4,800 films, instant results, no server.
+**[Try the live demo](https://movies.rishabhray.me)** - 4,800 films, instant results, no server.
 
 ```text
 The Dark Knight (2008)
