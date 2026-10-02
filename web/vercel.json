@@ -17,7 +17,7 @@
       "has": [
         {
           "type": "host",
-          "value": "movies.rishabhray.me"
+          "value": "rishabhray-movies.vercel.app"
         }
       ],
       "destination": "https://movies.rishabhray.me/",
@@ -28,7 +28,7 @@
       "has": [
         {
           "type": "host",
-          "value": "movies.rishabhray.me"
+          "value": "rishabhray-movies.vercel.app"
         }
       ],
       "destination": "https://movies.rishabhray.me/:path+",
