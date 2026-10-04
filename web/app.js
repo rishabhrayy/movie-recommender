@@ -32,11 +32,34 @@ function search(q, limit = 8) {
     .map((x) => x.i);
 }
 
-function show(i) {
+// A new search starts a new path; clicking a recommendation extends it
+const fresh = (i) => {
+  trail = [];
+  show(i);
+};
+
+// The films you have clicked through, so you can retrace your steps
+let trail = [];
+const pct = (x) => Math.round(Math.min(1, Math.max(0, x)) * 100);
+
+function show(i, { push = true } = {}) {
   const f = films[i];
+  const at = trail.indexOf(i);
+  trail = at >= 0 ? trail.slice(0, at + 1) : [...trail, i].slice(-8);
   $('q').value = f.t;
   closeList();
   $('result').innerHTML = `
+    ${
+      trail.length > 1
+        ? `<nav class="trail" aria-label="Films you explored"><span>Your path</span>${trail
+            .map((j) =>
+              j === i
+                ? `<b aria-current="page">${esc(films[j].t)}</b>`
+                : `<button type="button" class="step" data-i="${j}">${esc(films[j].t)}</button>`,
+            )
+            .join('<i aria-hidden="true">/</i>')}</nav>`
+        : ''
+    }
     <div class="picked">
       <p class="k">Because you liked</p>
       <h2>${esc(f.t)} ${f.y ? `<span>(${f.y})</span>` : ''}</h2>
@@ -52,14 +75,39 @@ function show(i) {
               <button type="button" class="title" data-i="${j}">${esc(r.t)} ${r.y ? `<span>(${r.y})</span>` : ''}</button>
               <p class="meta">${esc(r.g)}</p>
               <p class="why">${reasons(f, r).map((x) => `<span>${esc(x)}</span>`).join('')}</p>
+              ${
+                f.s
+                  ? `<p class="match" title="Blended similarity score">
+                      <span class="track"><span style="width:${pct(f.s[rank] / 0.75)}%"></span></span>
+                      <span>${f.s[rank].toFixed(2)} similarity</span>
+                    </p>`
+                  : ''
+              }
             </div>
           </li>`;
         })
         .join('')}
     </ol>
     <p class="hint">Click any title to keep exploring.</p>`;
-  history.replaceState(null, '', `?film=${encodeURIComponent(f.t)}`);
+  const url = `?film=${encodeURIComponent(f.t)}`;
+  if (push && location.search !== url) history.pushState({ i }, '', url);
+  else history.replaceState({ i }, '', url);
 }
+
+// Back and forward step through the films you explored
+window.addEventListener('popstate', (e) => {
+  const i = e.state?.i ?? search(new URLSearchParams(location.search).get('film') ?? '', 1)[0];
+  if (i != null) show(i, { push: false });
+  else {
+    trail = [];
+    $('result').innerHTML = '';
+    $('q').value = '';
+  }
+});
+
+// A random film people have actually heard of
+const known = films.map((f, i) => (f.v >= 1500 ? i : -1)).filter((i) => i >= 0);
+$('surprise').addEventListener('click', () => fresh(known[Math.floor(Math.random() * known.length)]));
 
 let active = -1;
 function openList(ids) {
@@ -92,19 +140,19 @@ $('q').addEventListener('keydown', (e) => {
   } else if (e.key === 'Enter') {
     e.preventDefault();
     const pick = opts[active] ?? opts[0];
-    if (pick) show(Number(pick.dataset.i));
+    if (pick) fresh(Number(pick.dataset.i));
   } else if (e.key === 'Escape') closeList();
 });
 $('list').addEventListener('mousedown', (e) => {
   const li = e.target.closest('[data-i]');
-  if (li) show(Number(li.dataset.i));
+  if (li) fresh(Number(li.dataset.i));
 });
 document.addEventListener('click', (e) => {
-  const t = e.target.closest('[data-i].title, [data-film]');
+  const t = e.target.closest('[data-i].title, [data-i].step, [data-film]');
   if (!t) return;
   if (t.dataset.film) {
     const hit = search(t.dataset.film, 1)[0];
-    if (hit != null) show(hit);
+    if (hit != null) fresh(hit);
   } else show(Number(t.dataset.i));
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
@@ -112,5 +160,5 @@ document.addEventListener('click', (e) => {
 const start = new URLSearchParams(location.search).get('film');
 if (start) {
   const hit = search(start, 1)[0];
-  if (hit != null) show(hit);
+  if (hit != null) show(hit, { push: false });
 }

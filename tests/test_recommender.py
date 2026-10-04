@@ -68,3 +68,29 @@ def test_web_export_matches_the_model(tmdb):
     assert len(films) == len(tmdb.movies)
     for i in (0, 100, 2000, len(films) - 1):
         assert films[i]["r"] == [j for j, _ in tmdb.recommend_index(i, 5)]
+
+
+def test_blending_two_films_finds_ones_like_both(tmdb):
+    titles = [r["title"] for r in tmdb.recommend_many(["Toy Story", "Alien"], 5)]
+    assert "Toy Story" not in titles and "Alien" not in titles
+    # not just a sequel of each: at least three results should be animated or comic sci-fi
+    assert not {"Toy Story 2", "Aliens"} <= set(titles)
+    assert "Galaxy Quest" in titles
+
+
+def test_blend_on_the_sample_skips_unknown_titles(sample):
+    recs = sample.recommend_many(["Inception", "Not A Real Film"], 3)
+    assert recs and all(r["title"] != "Inception" for r in recs)
+    assert sample.recommend_many(["Nothing", "Nada"]) == []
+
+
+def test_web_export_ships_match_scores(tmdb):
+    path = ROOT / "web" / "films.json"
+    if not path.exists():
+        pytest.skip("run `python -m src.export` first")
+    films = json.loads(path.read_text(encoding="utf-8"))
+    for i in (0, 100, 2000):
+        expected = [round(s, 3) for _, s in tmdb.recommend_index(i, 5)]
+        assert films[i]["s"] == expected
+        assert films[i]["s"] == sorted(films[i]["s"], reverse=True)
+

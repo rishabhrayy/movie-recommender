@@ -59,11 +59,40 @@ class MovieRecommender:
             {
                 "movie_id": int(self.movies.iloc[index]["movie_id"]),
                 "title": self.movies.iloc[index]["title"],
-                "year": None if not str(self.movies.iloc[index]["year"]).isdigit() else int(self.movies.iloc[index]["year"]),
+                "year": int(year) if (year := str(self.movies.iloc[index]["year"])).isdigit() else None,
                 "genres": self.movies.iloc[index]["genres"],
                 "score": round(score, 4),
                 "why": self.explain(movie_index, index),
             }
             for index, score in self.recommend_index(movie_index, top_n)
         ]
+
+    def recommend_many(self, titles: list[str], top_n: int = 5) -> list[dict]:
+        """Films for someone who liked all of `titles`: the geometric mean of their similarity scores.
+
+        A plain average lets one strong match win, so "Toy Story + Alien" returned Toy Story 2 and
+        Aliens. The geometric mean is near zero unless a film is close to every input, which gives
+        Galaxy Quest, Home and Titan A.E. instead. Each result says which liked film it is closest to.
+        """
+        indices = list(dict.fromkeys(i for t in titles if (i := find_movie_index(self.movies, t)) is not None))
+        if not indices:
+            return []
+        per_film = np.vstack([self.model.similarities(i) for i in indices])
+        scores = np.exp(np.log(np.clip(per_film, 1e-6, None)).mean(axis=0))
+        scores[indices] = -np.inf
+        top = np.argsort(-scores)[:top_n]
+        results = []
+        for index in top:
+            nearest = indices[int(np.argmax(per_film[:, index]))]
+            results.append(
+                {
+                    "movie_id": int(self.movies.iloc[index]["movie_id"]),
+                    "title": self.movies.iloc[index]["title"],
+                    "genres": self.movies.iloc[index]["genres"],
+                    "score": round(float(scores[index]), 4),
+                    "closest_to": self.movies.iloc[nearest]["title"],
+                    "why": self.explain(nearest, int(index)),
+                }
+            )
+        return results
 

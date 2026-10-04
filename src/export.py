@@ -23,6 +23,7 @@ def main() -> None:
     films = []
     for i, row in movies.iterrows():
         year = str(row["year"])
+        top = rec.recommend_index(i, TOP_N)
         films.append(
             {
                 "t": row["title"],
@@ -32,7 +33,8 @@ def main() -> None:
                 "c": row["cast"],
                 "k": " / ".join(str(row["keywords"]).split(" / ")[:10]),
                 "v": int(row["vote_count"]),
-                "r": [j for j, _ in rec.recommend_index(i, TOP_N)],
+                "r": [j for j, _ in top],
+                "s": [round(score, 3) for _, score in top],
             }
         )
 

@@ -1,8 +1,10 @@
 # Movie Recommender
 
+[![CI](https://github.com/rishabhrayy/movie-recommender/actions/workflows/ci.yml/badge.svg)](https://github.com/rishabhrayy/movie-recommender/actions/workflows/ci.yml) [![Demo](https://img.shields.io/badge/demo-movies.rishabhray.me-ff3d57)](https://movies.rishabhray.me) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Pick a film, get five similar ones, and see **why** each was picked: a shared director, a lead actor, genres, or themes.
 
-**[Try the live demo](https://movies.rishabhray.me)** - 4,800 films, instant results, no server.
+**[Try the live demo](https://movies.rishabhray.me)** - 4,800 films, instant results, no server. Each pick shows its similarity score, a trail records the films you clicked through (and the browser's Back button retraces it), and **Surprise me** starts from a random well-known film.
 
 ```text
 The Dark Knight (2008)
@@ -25,6 +27,10 @@ Two engineering choices worth calling out:
 - **Scores are computed per film, not as a full matrix.** A 4,800 x 4,800 similarity matrix is 180 MB; scoring one film against the sparse matrices takes milliseconds and almost no memory.
 - **The demo is precomputed.** Recommendations only change when the data does, so `src/export.py` computes every film's top 5 once into `web/films.json` (460 KB gzipped). The web page is then static, and the reasons are rebuilt in the browser from a little metadata per film.
 
+### Liked more than one film?
+
+`recommend_many` blends several films: `python app.py "Toy Story + Alien"`, or `/recommend?movie=Toy Story&movie=Alien` on the API. The blend is the **geometric mean** of each film's similarity scores, not the average. An average lets one strong match win, so Toy Story + Alien returned Toy Story 2 and Aliens. The geometric mean is near zero unless a film is close to *every* input, and gives Galaxy Quest, Home and Titan A.E. instead: films that are actually like both. Each result says which of your films it is closest to.
+
 Search is case-insensitive and partial, prefers the exact title and then the better-known film ("Batman" gives Tim Burton's, not an obscure namesake), and suggests close spellings when nothing matches ("Interstelar" -> did you mean Interstellar?).
 
 ## Run it
@@ -32,7 +38,8 @@ Search is case-insensitive and partial, prefers the exact title and then the bet
 ```bash
 pip install -r requirements.txt
 
-python app.py                 # interactive CLI
+python app.py                 # interactive CLI: one film, or several joined with "+"
+python app.py "Alien"         # answer once and exit
 python app.py --api           # Flask API: http://127.0.0.1:5000/recommend?movie=Inception
 python -m src.export          # rebuild web/films.json
 python -m pytest -q           # tests
@@ -55,7 +62,7 @@ Example API response:
 
 ## Tests
 
-Seven tests: the input film is never recommended to itself, search is case-insensitive and partial, unknown titles return suggestions, results are ordered by score, sequels and shared-director films are found on the real data, every recommendation has a reason, and the web export matches the model exactly.
+Ten tests: the input film is never recommended to itself, search is case-insensitive and partial, unknown titles return suggestions, results are ordered by score, sequels and shared-director films are found on the real data, every recommendation has a reason, blending two films finds ones like both (not a sequel of each), unknown titles in a blend are skipped, and the web export matches the model's picks and scores exactly. CI runs them with ruff on Python 3.11 to 3.13.
 
 ## Project structure
 
@@ -83,3 +90,7 @@ movie-recommender/
 ## Data
 
 [TMDB 5000 Movie Dataset](https://www.kaggle.com/datasets/tmdb/tmdb-movie-metadata) on Kaggle. This product uses TMDB data but is not endorsed or certified by TMDB. The raw data is not included in this repository.
+
+## Licence
+
+Code: [MIT](LICENSE). Data: see above.
